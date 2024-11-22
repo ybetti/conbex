@@ -99,11 +99,14 @@
         });
 
     updateBaseLengthButton.addEventListener('click', () => {
-         const newBaseLength = parseFloat(baseLengthInput.value);
-         if (!isNaN(newBaseLength) && newBaseLength > 0) {
-             baseLineLength = baseLineLength ? baseLineLength * (1 / newBaseLength) : newBaseLength;
-              output.innerHTML += `<br>基準を変更しました: 1mm = ${newBaseLength.toFixed(2)}ピクセル`;
-  } else {
+    const newBaseLength = parseFloat(baseLengthInput.value);
+    if (!isNaN(newBaseLength) && newBaseLength > 0) {
+        baseLineLength = baseLineLength ? baseLineLength * (1 / newBaseLength) : newBaseLength;
+        output.innerHTML += `<br>基準を変更しました: 1mm = ${newBaseLength.toFixed(2)}ピクセル`;
+
+        // ラベルを再計算して更新
+        updateLabels();
+    } else {
         alert("有効な数値を入力してください。");
     }
 });
@@ -240,7 +243,7 @@
             });
         }
 
-        function createLengthLabel(startX, startY, endX, endY, length, totalLength) {
+    function createLengthLabel(startX, startY, endX, endY, length, totalLength) {
     const ratio = baseLineLength === null ? 0 : length / baseLineLength;
     const label = document.createElement('div');
     label.className = 'length-label';
@@ -277,7 +280,19 @@
     });
 
     return label;
+
+    }
+
+
+    function updateLabels() {
+    labels.forEach((label, index) => {
+        const line = lines[index];
+        if (line) {
+            const ratio = baseLineLength === null ? 0 : line.length / baseLineLength;
+            label.innerText = `${isContinuousMode ? totalLength.toFixed(2) : ratio.toFixed(2)}mm`;
         }
+    });
+    }
     </script>
 </body>
 </html>
