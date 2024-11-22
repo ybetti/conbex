@@ -230,7 +230,7 @@
         ctx.beginPath();
         ctx.moveTo(line.x1, line.y1);
         ctx.lineTo(line.x2, line.y2);
-        ctx.strokeStyle = line.color; // 線の色を適用
+        ctx.strokeStyle = line.color; // 設定された色を適用
         ctx.lineWidth = 2;
         ctx.stroke();
         ctx.closePath();
@@ -244,10 +244,10 @@ canvas.addEventListener('mousedown', (e) => {
         let endY = e.offsetY;
 
         if (isHorizontalMode) {
-            endY = startY;
+            endY = startY; // 水平モード: Y座標固定
         }
         if (isVerticalMode) {
-            endX = startX;
+            endX = startX; // 垂直モード: X座標固定
         }
 
         const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
@@ -258,8 +258,24 @@ canvas.addEventListener('mousedown', (e) => {
             x2: endX,
             y2: endY,
             length: length,
-            color: currentColor // 選択した色を記録
+            color: currentColor // 選択された色を保持
         });
+
+        if (baseLineLength === null) {
+            baseLineLength = length;
+            output.innerHTML = `一本目の線を基準に設定しました。1mm = ${length.toFixed(2)}ピクセル`;
+        } else {
+            const ratio = length / baseLineLength;
+            if (isContinuousMode) {
+                totalLength += ratio;
+                output.innerHTML = `合計長さ: ${totalLength.toFixed(2)}mm`;
+            } else {
+                output.innerHTML = `長さ: ${ratio.toFixed(2)}mm`;
+            }
+        }
+
+        const label = createLengthLabel(startX, startY, endX, endY, length, totalLength);
+        labels.push(label);
 
         redraw();
         isDrawing = false;
@@ -279,8 +295,9 @@ canvas.addEventListener('mousedown', (e) => {
 
     const midX = (startX + endX) / 2;
     const midY = (startY + endY) / 2;
-    label.style.left = `${canvas.offsetLeft + midX}px`;
-    label.style.top = `${canvas.offsetTop + midY - 20}px`;
+    const canvasRect = canvas.getBoundingClientRect(); // キャンバスの位置を取得
+    label.style.left = `${canvasRect.left + midX}px`;
+    label.style.top = `${canvasRect.top + midY - 20}px`;
 
     let isDragging = false;
     let offsetX = 0;
@@ -307,9 +324,7 @@ canvas.addEventListener('mousedown', (e) => {
     });
 
     return label;
-
-    }
-
+}
 
     function updateLabels() {
     labels.forEach((label, index) => {
