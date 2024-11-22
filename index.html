@@ -126,19 +126,52 @@
 
         // 再描画関数
     function redraw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(image, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(image, 0, 0);
 
-        lines.forEach(line => {
-            ctx.beginPath();
-            ctx.moveTo(line.x1, line.y1);
-            ctx.lineTo(line.x2, line.y2);
-            ctx.strokeStyle = 'red';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            ctx.closePath();
+    lines.forEach(line => {
+        ctx.beginPath();
+        ctx.moveTo(line.x1, line.y1);
+        ctx.lineTo(line.x2, line.y2);
+        ctx.strokeStyle = line.color; // 線の色を適用
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.closePath();
+    });
+}
+
+// 線を追加する箇所で色を保持
+canvas.addEventListener('mousedown', (e) => {
+    if (isDrawing) {
+        let endX = e.offsetX;
+        let endY = e.offsetY;
+
+        if (isHorizontalMode) {
+            endY = startY;
+        }
+        if (isVerticalMode) {
+            endX = startX;
+        }
+
+        const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+
+        lines.push({
+            x1: startX,
+            y1: startY,
+            x2: endX,
+            y2: endY,
+            length: length,
+            color: currentColor // 選択した色を記録
         });
+
+        redraw();
+        isDrawing = false;
+    } else {
+        startX = e.offsetX;
+        startY = e.offsetY;
+        isDrawing = true;
     }
+});
 
         // 線を引くための開始点（マウスダウン）
         canvas.addEventListener('mousedown', (e) => {
