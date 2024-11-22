@@ -200,7 +200,6 @@
         isHorizontalMode = !isHorizontalMode;
         isVerticalMode = false; // 垂直モードをオフ
         horizontalModeButton.textContent = `水平モード: ${isHorizontalMode ? 'オン' : 'オフ'}`;
-        verticalModeButton.textContent = '垂直モード: オフ';
     });
 
     // 垂直モードの切り替え
@@ -208,6 +207,7 @@
         isVerticalMode = !isVerticalMode;
         isHorizontalMode = false; // 水平モードをオフ
         verticalModeButton.textContent = `垂直モード: ${isVerticalMode ? 'オン' : 'オフ'}`;
+        horizontalModeButton.textContent = '水平モード: オフ';
     });
 
 
