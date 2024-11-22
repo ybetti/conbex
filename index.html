@@ -62,8 +62,7 @@
         const horizontalModeButton = document.getElementById('horizontalModeButton');
         const verticalModeButton = document.createElement('button');
 
-    document.body.appendChild(horizontalModeButton);
-    document.body.appendChild(verticalModeButton);
+    
         
         let image = new Image();
         let isDrawing = false;
@@ -196,19 +195,20 @@
         });
 
         // 水平モードの切り替え
-    horizontalModeButton.addEventListener('click', () => {
-        isHorizontalMode = !isHorizontalMode;
-        isVerticalMode = false; // 垂直モードをオフ
-        horizontalModeButton.textContent = `水平モード: ${isHorizontalMode ? 'オン' : 'オフ'}`;
-    });
+    　　horizontalModeButton.addEventListener('click', () => {
+        　　isHorizontalMode = !isHorizontalMode;
+       　　 isVerticalMode = false; // 垂直モードをオフ
+      　　  horizontalModeButton.textContent = `水平モード: ${isHorizontalMode ? 'オン' : 'オフ'}`;
+        　　verticalModeButton.textContent = '垂直モード: オフ';
+ 　　   });
 
-    // 垂直モードの切り替え
-    verticalModeButton.addEventListener('click', () => {
-        isVerticalMode = !isVerticalMode;
-        isHorizontalMode = false; // 水平モードをオフ
-        verticalModeButton.textContent = `垂直モード: ${isVerticalMode ? 'オン' : 'オフ'}`;
-        horizontalModeButton.textContent = '水平モード: オフ';
-    });
+   　　 // 垂直モードの切り替え
+   　　 verticalModeButton.addEventListener('click', () => {
+      　　  isVerticalMode = !isVerticalMode;
+      　　  isHorizontalMode = false; // 水平モードをオフ
+     　　   verticalModeButton.textContent = `垂直モード: ${isVerticalMode ? 'オン' : 'オフ'}`;
+     　　   horizontalModeButton.textContent = '水平モード: オフ';
+   　　 });
 
 
         // 再描画関数
