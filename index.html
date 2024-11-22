@@ -228,18 +228,42 @@
         }
 
         function createLengthLabel(startX, startY, endX, endY, length, totalLength) {
-            const ratio = baseLineLength === null ? 0 : length / baseLineLength;
-            const label = document.createElement('div');
-            label.className = 'length-label';
-            label.innerText = `${isContinuousMode ? totalLength.toFixed(2) : ratio.toFixed(2)}mm`;
-            document.body.appendChild(label);
+    const ratio = baseLineLength === null ? 0 : length / baseLineLength;
+    const label = document.createElement('div');
+    label.className = 'length-label';
+    label.innerText = `${isContinuousMode ? totalLength.toFixed(2) : ratio.toFixed(2)}mm`;
+    document.body.appendChild(label);
 
-            const midX = (startX + endX) / 2;
-            const midY = (startY + endY) / 2;
-            label.style.left = `${canvas.offsetLeft + midX}px`;
-            label.style.top = `${canvas.offsetTop + midY - 20}px`;
+    const midX = (startX + endX) / 2;
+    const midY = (startY + endY) / 2;
+    label.style.left = `${canvas.offsetLeft + midX}px`;
+    label.style.top = `${canvas.offsetTop + midY - 20}px`;
 
-            return label;
+    let isDragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    // ドラッグ開始
+    label.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offsetX = e.clientX - label.offsetLeft;
+        offsetY = e.clientY - label.offsetTop;
+    });
+
+    // ドラッグ中
+    document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            label.style.left = `${e.clientX - offsetX}px`;
+            label.style.top = `${e.clientY - offsetY}px`;
+        }
+    });
+
+    // ドラッグ終了
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
+
+    return label;
         }
     </script>
 </body>
