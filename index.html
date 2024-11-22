@@ -33,10 +33,13 @@
     
     <input type="file" id="imageInput" accept="image/*">
      <div id="buttonContainer" style="display: flex; gap: 10px; margin-bottom: 10px;">
-        <button id="undoButton">一つ戻る</button>
-        <button id="toggleModeButton">連続測定モード: オフ</button>
-        <button id="horizontalModeButton">水平モード: オフ</button>
-        <button id="verticalModeButton">垂直モード: オフ</button>
+     <label for="baseLengthInput">基準(mm): </label>
+     <input type="number" id="baseLengthInput" placeholder="1.0" step="0.01" min="0.01" style="width: 80px;">
+     <button id="updateBaseLengthButton">基準を変更</button>
+     <button id="undoButton">一つ戻る</button>
+     <button id="toggleModeButton">連続測定モード: オフ</button>
+     <button id="horizontalModeButton">水平モード: オフ</button>
+     <button id="verticalModeButton">垂直モード: オフ</button>
     </div>
     
     <p>クリックして始点と終点を決定します。</p>
@@ -61,6 +64,8 @@
         const toggleModeButton = document.getElementById('toggleModeButton');
         const horizontalModeButton = document.getElementById('horizontalModeButton');
         const verticalModeButton = document.getElementById('verticalModeButton');
+        const baseLengthInput = document.getElementById('baseLengthInput');
+        const updateBaseLengthButton = document.getElementById('updateBaseLengthButton');
 
         
         let image = new Image();
@@ -92,6 +97,16 @@
             alert('画像ファイルを選択してください！');
             }
         });
+
+    updateBaseLengthButton.addEventListener('click', () => {
+         const newBaseLength = parseFloat(baseLengthInput.value);
+         if (!isNaN(newBaseLength) && newBaseLength > 0) {
+             baseLineLength = baseLineLength ? baseLineLength * (1 / newBaseLength) : newBaseLength;
+              output.innerHTML += `<br>基準を変更しました: 1mm = ${newBaseLength.toFixed(2)}ピクセル`;
+  } else {
+        alert("有効な数値を入力してください。");
+    }
+});
 
         // 画像をCanvasに描画する
         image.onload = () => {
@@ -141,7 +156,6 @@
                     output.innerHTML = `一本目の線を基準に設定しました。1mm = ${length.toFixed(2)}ピクセル`;
                 } else {
                     const ratio = length / baseLineLength;
-                    
                     if (isContinuousMode) {
                         totalLength += ratio;
                         output.innerHTML = `合計長さ: ${totalLength.toFixed(2)}mm`;
