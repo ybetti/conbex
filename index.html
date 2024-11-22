@@ -40,6 +40,8 @@
      <button id="toggleModeButton">連続測定モード: オフ</button>
      <button id="horizontalModeButton">水平モード: オフ</button>
      <button id="verticalModeButton">垂直モード: オフ</button>
+     <label for="colorPicker">線の色:</label>
+     <input type="color" id="colorPicker" value="#ff0000">
     </div>
     
     <p>クリックして始点と終点を決定します。</p>
@@ -84,6 +86,7 @@
         let dragOffsetX = 0;
         let dragOffsetY = 0;
         let currentLabel = null;
+        let currentColor = "#ff0000"
 
         // 画像が選択されたときに表示する
         imageInput.addEventListener('change', (event) => {
@@ -182,6 +185,12 @@
                 isDrawing = true;
             }
         });
+
+        const colorPicker = document.getElementById('colorPicker');
+           colorPicker.addEventListener('input', (event) => {
+              currentColor = event.target.value;
+        });
+
 
         // 1つ戻る機能
         undoButton.addEventListener('click', () => {
