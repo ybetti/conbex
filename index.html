@@ -209,29 +209,36 @@
             horizontalModeButton.textContent = '水平モード: オフ';
         });
 
-        updateBaseLengthButton.addEventListener('click', () => {
+    updateBaseLengthButton.addEventListener('click', () => {
     const newBaseLength = parseFloat(baseLengthInput.value);
     if (isNaN(newBaseLength) || newBaseLength <= 0) {
         alert('正しい基準値を入力してください。');
         return;
     }
 
-    // 基準値を更新
-    const scaleFactor = baseLineLength ? newBaseLength / (baseLineLength / baseLineLength) : 1;
+    // 古い基準に基づいて計算された長さを新基準に合わせて再スケール
+    const scaleFactor = baseLineLength ? newBaseLength / baseLineLength : 1;
     baseLineLength = newBaseLength;
 
-    // 線とラベルを再計算
+    // 線の長さとラベルを再計算
+    totalLength = 0; // 連続測定モード用の合計長さをリセット
     lines.forEach((line, index) => {
         const pixelLength = line.length;
         const newRatio = pixelLength / baseLineLength;
 
-        // 更新されたラベルの数値を再計算
+        // 連続測定モードの場合、合計長さを再計算
+        if (isContinuousMode) {
+            totalLength += newRatio;
+        }
+
+        // ラベルを更新
         const label = labels[index];
         if (label) {
             label.textContent = isContinuousMode && index === lines.length - 1
-                ? `${totalLength.toFixed(2)}mm`
+                ? `合計: ${totalLength.toFixed(2)}mm`
                 : `${newRatio.toFixed(2)}mm`;
 
+            // ラベルの位置も再設定
             const midX = (line.x1 + line.x2) / 2;
             const midY = (line.y1 + line.y2) / 2;
             label.style.left = `${canvas.offsetLeft + midX}px`;
@@ -239,8 +246,11 @@
         }
     });
 
-    // 出力も更新
-    output.innerHTML = `1mm = ${baseLineLength.toFixed(2)}ピクセル`;
+    // 出力を更新
+    output.innerHTML = `基準を更新しました: 1mm = ${baseLineLength.toFixed(2)}ピクセル`;
+
+    // 再描画
+    redraw();
 });
 
     </script>
