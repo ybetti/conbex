@@ -43,6 +43,15 @@
         <input type="color" id="colorPicker" value="#ff0000">
     </div>
     <p>クリックして始点と終点を決定します。</p>
+    <p>一本目の線を1mmが基準となり、二本目以降の線の長さを測定します。</p>
+    <p>連続測定モードを追加、モード中は合計の長さを計測出来ます。</p>
+    <p>始点と終点の●をなくしました。</p>
+    <p>数値欄をドラッグできるようにしました。</p>
+    <p>水平モードを追加しました。</p>
+    <p>垂直モードを追加しました。</p>
+    <p>線の色を変更できるようにしました。既に描画されている線は変わりません。</p>
+    <p>基準を変更できるようにしました。(一本基準の線を引いてから数値を入力、変更ボタンを使用してください)</p>
+
     <div style="display: flex; align-items: center;">
         <canvas id="canvas"></canvas>
         <div id="output"></div>
@@ -199,6 +208,41 @@
             verticalModeButton.textContent = `垂直モード: ${isVerticalMode ? 'オン' : 'オフ'}`;
             horizontalModeButton.textContent = '水平モード: オフ';
         });
+
+        updateBaseLengthButton.addEventListener('click', () => {
+    const newBaseLength = parseFloat(baseLengthInput.value);
+    if (isNaN(newBaseLength) || newBaseLength <= 0) {
+        alert('正しい基準値を入力してください。');
+        return;
+    }
+
+    // 基準値を更新
+    const scaleFactor = baseLineLength ? newBaseLength / (baseLineLength / baseLineLength) : 1;
+    baseLineLength = newBaseLength;
+
+    // 線とラベルを再計算
+    lines.forEach((line, index) => {
+        const pixelLength = line.length;
+        const newRatio = pixelLength / baseLineLength;
+
+        // 更新されたラベルの数値を再計算
+        const label = labels[index];
+        if (label) {
+            label.textContent = isContinuousMode && index === lines.length - 1
+                ? `${totalLength.toFixed(2)}mm`
+                : `${newRatio.toFixed(2)}mm`;
+
+            const midX = (line.x1 + line.x2) / 2;
+            const midY = (line.y1 + line.y2) / 2;
+            label.style.left = `${canvas.offsetLeft + midX}px`;
+            label.style.top = `${canvas.offsetTop + midY}px`;
+        }
+    });
+
+    // 出力も更新
+    output.innerHTML = `1mm = ${baseLineLength.toFixed(2)}ピクセル`;
+});
+
     </script>
 </body>
 </html>
