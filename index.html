@@ -210,24 +210,24 @@
         });
 
     updateBaseLengthButton.addEventListener('click', () => {
-    const newBaseLength = parseFloat(baseLengthInput.value);
+    const newBaseLengthMultiplier = parseFloat(baseLengthInput.value);
 
-    if (isNaN(newBaseLength) || newBaseLength <= 0) {
+    if (isNaN(newBaseLengthMultiplier) || newBaseLengthMultiplier <= 0) {
         alert('正しい基準値を入力してください。');
         return;
     }
 
-    // ラベルの数値を基準値に基づいて再計算
+    // ラベルの数値を新しい基準値で再計算して更新
     lines.forEach((line, index) => {
-        const originalLengthInPixels = line.length; // 元のピクセル数
-        const scaledLength = (originalLengthInPixels / baseLineLength) * newBaseLength; // 新しい基準値で換算
+        const originalLength = line.length; // 元の長さ（ピクセル数を保持）
+        const scaledLength = originalLength * newBaseLengthMultiplier; // 新しい基準値で換算した長さ
 
         // ラベルを更新
         const label = labels[index];
         if (label) {
             label.textContent = `${scaledLength.toFixed(2)}mm`;
 
-            // ラベルの位置を更新
+            // ラベルの位置を更新（必要に応じて）
             const midX = (line.x1 + line.x2) / 2;
             const midY = (line.y1 + line.y2) / 2;
             label.style.left = `${canvas.offsetLeft + midX}px`;
@@ -235,16 +235,15 @@
         }
     });
 
-    // 基準値を更新
-    baseLineLength = newBaseLength;
+    // 基準値（スケール係数）を保持
+    currentBaseMultiplier = newBaseLengthMultiplier;
 
     // 出力を更新
-    output.innerHTML = `基準を更新しました: 1ピクセル = ${newBaseLength.toFixed(2)}mm`;
+    output.innerHTML = `基準を更新しました: 倍率 = ${newBaseLengthMultiplier.toFixed(2)}`;
 
-    // 再描画
+    // 再描画（必要に応じて）
     redraw();
 });
-
 
     </script>
 </body>
