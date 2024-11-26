@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -33,7 +34,7 @@
     <input type="file" id="imageInput" accept="image/*">
     <div id="buttonContainer" style="display: flex; gap: 10px; margin-bottom: 10px;">
         <label for="baseLengthInput">基準(mm): </label>
-        <input id="baseLengthInput" type="text" placeholder="新しい基準値" />
+        <input type="number" id="baseLengthInput" placeholder="1.0" step="0.01" min="0.01" style="width: 80px;">
         <button id="updateBaseLengthButton">基準を変更</button>
         <button id="undoButton">一つ戻る</button>
         <button id="toggleModeButton">連続測定モード: オフ</button>
@@ -43,15 +44,6 @@
         <input type="color" id="colorPicker" value="#ff0000">
     </div>
     <p>クリックして始点と終点を決定します。</p>
-    <p>一本目の線を1mmが基準となり、二本目以降の線の長さを測定します。</p>
-    <p>連続測定モードを追加、モード中は合計の長さを計測出来ます。</p>
-    <p>始点と終点の●をなくしました。</p>
-    <p>数値欄をドラッグできるようにしました。</p>
-    <p>水平モードを追加しました。</p>
-    <p>垂直モードを追加しました。</p>
-    <p>線の色を変更できるようにしました。既に描画されている線は変わりません。</p>
-    <p>基準を変更できるようにしました。(一本基準の線を引いてから数値を入力、変更ボタンを使用してください)</p>
-
     <div style="display: flex; align-items: center;">
         <canvas id="canvas"></canvas>
         <div id="output"></div>
@@ -208,73 +200,6 @@
             verticalModeButton.textContent = `垂直モード: ${isVerticalMode ? 'オン' : 'オフ'}`;
             horizontalModeButton.textContent = '水平モード: オフ';
         });
-
-    // 初期の基準値（倍率）
-// 初期基準値（倍率）
-let baseMultiplier = 1.0; // 初期値1.0mm = 1倍
-const baseLengthPerPixel = 0.1; // 1ピクセルあたりの長さ（例: 0.1mm）
-
-// 基準値更新ボタンがクリックされたときの処理
-updateBaseLengthButton.addEventListener('click', () => {
-    const inputValue = parseFloat(baseLengthInput.value);
-
-    if (isNaN(inputValue) || inputValue <= 0) {
-        alert('有効な基準値を入力してください。');
-        return;
-    }
-
-    // 新しい倍率を設定
-    baseMultiplier = inputValue;
-
-    // ラベルを更新
-    updateLabels();
-
-    // コンソールログで確認
-    console.log(`基準値を更新: 倍率 = ${baseMultiplier}`);
-});
-
-// ラベル更新関数
-function updateLabels() {
-    lines.forEach((line, index) => {
-        const pixelLength = line.pixelLength; // 元のピクセル数
-        const scaledLength = (pixelLength * baseLengthPerPixel) * baseMultiplier; // 新しい倍率でスケーリング
-
-        // ラベルを更新
-        const label = labels[index];
-        if (label) {
-            label.textContent = `${scaledLength.toFixed(2)} mm`;
-            console.log(`ラベル更新: ${scaledLength.toFixed(2)} mm`);
-
-            // ラベル位置を更新（必要に応じて）
-            const midX = (line.x1 + line.x2) / 2;
-            const midY = (line.y1 + line.y2) / 2;
-            label.style.left = `${canvas.offsetLeft + midX}px`;
-            label.style.top = `${canvas.offsetTop + midY}px`;
-        }
-    });
-
-    // 再描画が必要なら実行
-    redraw();
-}
-
-// 線情報の例
-const lines = [
-    { x1: 10, y1: 10, x2: 110, y2: 10, pixelLength: 100 }, // 例: 長さ100ピクセル
-];
-
-// ラベル情報の例
-const labels = lines.map(() => document.createElement('div'));
-labels.forEach((label, index) => {
-    label.style.position = 'absolute';
-    label.style.backgroundColor = 'white';
-    label.style.border = '1px solid black';
-    document.body.appendChild(label);
-});
-
-// 初期描画
-updateLabels();
-
-        
     </script>
 </body>
 </html>
