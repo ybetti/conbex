@@ -210,16 +210,17 @@
         });
 
     updateBaseLengthButton.addEventListener('click', () => {
-    const inputBaseLength = parseFloat(baseLengthInput.value);
-    if (isNaN(inputBaseLength) || inputBaseLength <= 0) {
+    const newBaseLength = parseFloat(baseLengthInput.value);
+
+    if (isNaN(newBaseLength) || newBaseLength <= 0) {
         alert('正しい基準値を入力してください。');
         return;
     }
 
-    // ラベルの数値を基準値に基づいて更新
+    // ラベルの数値を基準値に基づいて再計算
     lines.forEach((line, index) => {
-        const baseRatio = 1.0; // 基準値（固定値）
-        const scaledLength = baseRatio * inputBaseLength; // 基準値に入力値を掛ける
+        const originalLengthInPixels = line.length; // 元のピクセル数
+        const scaledLength = (originalLengthInPixels / baseLineLength) * newBaseLength; // 新しい基準値で換算
 
         // ラベルを更新
         const label = labels[index];
@@ -234,12 +235,16 @@
         }
     });
 
+    // 基準値を更新
+    baseLineLength = newBaseLength;
+
     // 出力を更新
-    output.innerHTML = `基準を更新しました: 入力値は ${inputBaseLength.toFixed(2)}`;
+    output.innerHTML = `基準を更新しました: 1ピクセル = ${newBaseLength.toFixed(2)}mm`;
 
     // 再描画
     redraw();
 });
+
 
     </script>
 </body>
