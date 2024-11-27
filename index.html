@@ -146,71 +146,25 @@
             }
         });
 
-        canvas.addEventListener('mouseup', () => {
-            if (isDrawing) {
-                redraw(); // ガイド線を消去
-            }
+        toggleModeButton.addEventListener('click', () => {
+            isContinuousMode = !isContinuousMode;
+            toggleModeButton.textContent = `連続測定モード: ${isContinuousMode ? 'オン' : 'オフ'}`;
+            if (!isContinuousMode) totalLength = 0; // モードをオフにしたら合計をリセット
         });
 
-        updateBaseLengthButton.addEventListener('click', () => {
-            const newBaseLength = parseFloat(baseLengthInput.value);
-            if (isNaN(newBaseLength) || newBaseLength <= 0) {
-                alert('有効な基準値を入力してください！');
-                return;
-            }
-
-            if (lines.length > 0) {
-                const firstLine = lines[0];
-                const originalLengthPixels = Math.sqrt(
-                    (firstLine.x2 - firstLine.x1) ** 2 + (firstLine.y2 - firstLine.y1) ** 2
-                );
-                basePixelsPerMM = originalLengthPixels / newBaseLength;
-            } else {
-                basePixelsPerMM = canvas.width / newBaseLength;
-            }
-
-            labels.forEach((label, index) => {
-                const line = lines[index];
-                const lengthMM = line.length / basePixelsPerMM;
-                label.textContent = `${lengthMM.toFixed(2)}mm`;
-            });
-
-            output.innerHTML = `基準値変更: 1mm = ${basePixelsPerMM.toFixed(2)}ピクセル`;
-            redraw();
+        horizontalModeButton.addEventListener('click', () => {
+            isHorizontalMode = !isHorizontalMode;
+            isVerticalMode = false; // 他のモードは無効化
+            horizontalModeButton.textContent = `水平モード: ${isHorizontalMode ? 'オン' : 'オフ'}`;
+            verticalModeButton.textContent = `垂直モード: オフ`;
         });
 
-        function createLengthLabel(x1, y1, x2, y2, lengthMM, total) {
-            const label = document.createElement('div');
-            label.className = 'length-label';
-            label.textContent = isContinuousMode ? `${total.toFixed(2)}mm` : `${lengthMM.toFixed(2)}mm`;
-            document.body.appendChild(label);
-
-            const midX = (x1 + x2) / 2;
-            const midY = (y1 + y2) / 2;
-            label.style.left = `${canvas.offsetLeft + midX}px`;
-            label.style.top = `${canvas.offsetTop + midY}px`;
-
-            label.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                const offsetX = e.clientX - label.offsetLeft;
-                const offsetY = e.clientY - label.offsetTop;
-
-                const onMouseMove = (e) => {
-                    label.style.left = `${e.clientX - offsetX}px`;
-                    label.style.top = `${e.clientY - offsetY}px`;
-                };
-
-                const onMouseUp = () => {
-                    document.removeEventListener('mousemove', onMouseMove);
-                    document.removeEventListener('mouseup', onMouseUp);
-                };
-
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', onMouseUp);
-            });
-
-            return label;
-        }
+        verticalModeButton.addEventListener('click', () => {
+            isVerticalMode = !isVerticalMode;
+            isHorizontalMode = false; // 他のモードは無効化
+            verticalModeButton.textContent = `垂直モード: ${isVerticalMode ? 'オン' : 'オフ'}`;
+            horizontalModeButton.textContent = `水平モード: オフ`;
+        });
 
         function redraw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
