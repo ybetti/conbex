@@ -145,37 +145,6 @@
             }
         });
 
-        undoButton.addEventListener('click', () => {
-            if (lines.length > 0) {
-                lines.pop(); // 最後の線を削除
-                labels.pop(); // 最後のラベルを削除
-                totalLength = 0;
-                redraw();
-                output.innerHTML = `長さ: 0mm`;
-            }
-        });
-
-        toggleModeButton.addEventListener('click', () => {
-            isContinuousMode = !isContinuousMode;
-            toggleModeButton.textContent = `連続測定モード: ${isContinuousMode ? 'オン' : 'オフ'}`;
-        });
-
-        horizontalModeButton.addEventListener('click', () => {
-            isHorizontalMode = !isHorizontalMode;
-            horizontalModeButton.textContent = `水平モード: ${isHorizontalMode ? 'オン' : 'オフ'}`;
-        });
-
-        verticalModeButton.addEventListener('click', () => {
-            isVerticalMode = !isVerticalMode;
-            verticalModeButton.textContent = `垂直モード: ${isVerticalMode ? 'オン' : 'オフ'}`;
-        });
-
-        toggleMarkersButton.addEventListener('click', () => {
-            showMarkers = !showMarkers;
-            toggleMarkersButton.textContent = `印表示: ${showMarkers ? 'オン' : 'オフ'}`;
-            redraw();
-        });
-
         saveButton.addEventListener('click', () => {
             const tempCanvas = document.createElement('canvas');
             const tempCtx = tempCanvas.getContext('2d');
@@ -185,33 +154,36 @@
             // 元画像と描画内容をコピー
             tempCtx.drawImage(canvas, 0, 0);
 
-            // ラベルをキャンバスに描画（背景黒、文字白）
+            // ラベルをキャンバスに描画
             labels.forEach(label => {
                 const rect = label.getBoundingClientRect();
                 const x = rect.left - canvas.offsetLeft;
                 const y = rect.top - canvas.offsetTop;
-
                 tempCtx.font = '12px Arial';
-                tempCtx.fillStyle = 'white'; // 文字色白
-                tempCtx.fillRect(x, y, rect.width, rect.height); // 背景黒
-                tempCtx.fillStyle = 'black'; // 数値の文字色
-                tempCtx.fillText(label.textContent, x + 3, y + 12);
+                tempCtx.fillStyle = 'white';
+                tempCtx.strokeStyle = 'black';
+                tempCtx.lineWidth = 2;
+                tempCtx.fillText(label.textContent, x, y);
+                tempCtx.strokeText(label.textContent, x, y);
             });
 
-            // 保存用画像を生成
-            const dataUrl = tempCanvas.toDataURL('image/png');
+            // 保存
             const link = document.createElement('a');
-            link.href = dataUrl;
-            link.download = 'measured_image.png';
+            link.href = tempCanvas.toDataURL('image/png');
+            link.download = 'canvas_with_lines.png';
             link.click();
         });
 
-        function createLengthLabel(x1, y1, x2, y2, lengthMM, totalLength) {
+        function createLengthLabel(x1, y1, x2, y2, lengthMM, total) {
             const label = document.createElement('div');
             label.className = 'length-label';
-            label.textContent = `${lengthMM.toFixed(2)}mm`;
-            label.style.left = `${(x1 + x2) / 2 + 10}px`;
-            label.style.top = `${(y1 + y2) / 2 + 10}px`;
+            label.textContent = isContinuousMode ? `${total.toFixed(2)}mm` : `${lengthMM.toFixed(2)}mm`;
+            document.body.appendChild(label);
+
+            const midX = (x1 + x2) / 2;
+            const midY = (y1 + y2) / 2;
+            label.style.left = `${canvas.offsetLeft + midX}px`;
+            label.style.top = `${canvas.offsetTop + midY}px`;
 
             label.addEventListener('mousedown', (e) => {
                 e.stopPropagation();
@@ -246,17 +218,6 @@
                 ctx.lineTo(line.x2, line.y2);
                 ctx.stroke();
             });
-
-            if (showMarkers) {
-                lines.forEach(line => {
-                    ctx.beginPath();
-                    ctx.moveTo(line.x1, line.y1);
-                    ctx.lineTo(line.x1, line.y1 + 10); // 10pxの縦線
-                    ctx.moveTo(line.x2, line.y2);
-                    ctx.lineTo(line.x2, line.y2 + 10); // 10pxの縦線
-                    ctx.stroke();
-                });
-            }
 
             if (currentGuide) {
                 ctx.setLineDash([5, 5]);
