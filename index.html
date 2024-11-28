@@ -145,6 +145,37 @@
             }
         });
 
+        undoButton.addEventListener('click', () => {
+            if (lines.length > 0) {
+                lines.pop(); // 最後の線を削除
+                labels.pop(); // 最後のラベルを削除
+                totalLength = 0;
+                redraw();
+                output.innerHTML = `長さ: 0mm`;
+            }
+        });
+
+        toggleModeButton.addEventListener('click', () => {
+            isContinuousMode = !isContinuousMode;
+            toggleModeButton.textContent = `連続測定モード: ${isContinuousMode ? 'オン' : 'オフ'}`;
+        });
+
+        horizontalModeButton.addEventListener('click', () => {
+            isHorizontalMode = !isHorizontalMode;
+            horizontalModeButton.textContent = `水平モード: ${isHorizontalMode ? 'オン' : 'オフ'}`;
+        });
+
+        verticalModeButton.addEventListener('click', () => {
+            isVerticalMode = !isVerticalMode;
+            verticalModeButton.textContent = `垂直モード: ${isVerticalMode ? 'オン' : 'オフ'}`;
+        });
+
+        toggleMarkersButton.addEventListener('click', () => {
+            showMarkers = !showMarkers;
+            toggleMarkersButton.textContent = `印表示: ${showMarkers ? 'オン' : 'オフ'}`;
+            redraw();
+        });
+
         saveButton.addEventListener('click', () => {
             const tempCanvas = document.createElement('canvas');
             const tempCtx = tempCanvas.getContext('2d');
@@ -162,37 +193,25 @@
 
                 tempCtx.font = '12px Arial';
                 tempCtx.fillStyle = 'white'; // 文字色白
-                tempCtx.strokeStyle = 'black'; // 枠線黒
-                tempCtx.lineWidth = 2;
-                const labelWidth = tempCtx.measureText(label.textContent).width;
-                const labelHeight = 14; // 高さ
-
-                // 背景黒
-                tempCtx.fillStyle = 'black';
-                tempCtx.fillRect(x - 2, y - labelHeight, labelWidth + 4, labelHeight + 4);
-
-                // 文字白
-                tempCtx.fillStyle = 'white';
-                tempCtx.fillText(label.textContent, x, y - 2);
+                tempCtx.fillRect(x, y, rect.width, rect.height); // 背景黒
+                tempCtx.fillStyle = 'black'; // 数値の文字色
+                tempCtx.fillText(label.textContent, x + 3, y + 12);
             });
 
-            // 保存
+            // 保存用画像を生成
+            const dataUrl = tempCanvas.toDataURL('image/png');
             const link = document.createElement('a');
-            link.href = tempCanvas.toDataURL('image/png');
-            link.download = 'canvas_with_lines.png';
+            link.href = dataUrl;
+            link.download = 'measured_image.png';
             link.click();
         });
 
-        function createLengthLabel(x1, y1, x2, y2, lengthMM, total) {
+        function createLengthLabel(x1, y1, x2, y2, lengthMM, totalLength) {
             const label = document.createElement('div');
             label.className = 'length-label';
-            label.textContent = isContinuousMode ? `${total.toFixed(2)}mm` : `${lengthMM.toFixed(2)}mm`;
-            document.body.appendChild(label);
-
-            const midX = (x1 + x2) / 2;
-            const midY = (y1 + y2) / 2;
-            label.style.left = `${canvas.offsetLeft + midX}px`;
-            label.style.top = `${canvas.offsetTop + midY}px`;
+            label.textContent = `${lengthMM.toFixed(2)}mm`;
+            label.style.left = `${(x1 + x2) / 2 + 10}px`;
+            label.style.top = `${(y1 + y2) / 2 + 10}px`;
 
             label.addEventListener('mousedown', (e) => {
                 e.stopPropagation();
@@ -227,6 +246,17 @@
                 ctx.lineTo(line.x2, line.y2);
                 ctx.stroke();
             });
+
+            if (showMarkers) {
+                lines.forEach(line => {
+                    ctx.beginPath();
+                    ctx.moveTo(line.x1, line.y1);
+                    ctx.lineTo(line.x1, line.y1 + 10); // 10pxの縦線
+                    ctx.moveTo(line.x2, line.y2);
+                    ctx.lineTo(line.x2, line.y2 + 10); // 10pxの縦線
+                    ctx.stroke();
+                });
+            }
 
             if (currentGuide) {
                 ctx.setLineDash([5, 5]);
