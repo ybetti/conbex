@@ -154,17 +154,26 @@
             // 元画像と描画内容をコピー
             tempCtx.drawImage(canvas, 0, 0);
 
-            // ラベルをキャンバスに描画
+            // ラベルをキャンバスに描画（背景黒、文字白）
             labels.forEach(label => {
                 const rect = label.getBoundingClientRect();
                 const x = rect.left - canvas.offsetLeft;
                 const y = rect.top - canvas.offsetTop;
+
                 tempCtx.font = '12px Arial';
-                tempCtx.fillStyle = 'white';
-                tempCtx.strokeStyle = 'black';
+                tempCtx.fillStyle = 'white'; // 文字色白
+                tempCtx.strokeStyle = 'black'; // 枠線黒
                 tempCtx.lineWidth = 2;
-                tempCtx.fillText(label.textContent, x, y);
-                tempCtx.strokeText(label.textContent, x, y);
+                const labelWidth = tempCtx.measureText(label.textContent).width;
+                const labelHeight = 14; // 高さ
+
+                // 背景黒
+                tempCtx.fillStyle = 'black';
+                tempCtx.fillRect(x - 2, y - labelHeight, labelWidth + 4, labelHeight + 4);
+
+                // 文字白
+                tempCtx.fillStyle = 'white';
+                tempCtx.fillText(label.textContent, x, y - 2);
             });
 
             // 保存
