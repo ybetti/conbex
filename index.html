@@ -74,6 +74,7 @@
         let isVerticalMode = false;
         let showMarkers = false; // 印の表示状態
         let currentColor = "#ff0000";
+        let currentGuide = null; // ガイド線情報
 
         imageInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
@@ -125,10 +126,20 @@
                 labels.push(label);
                 redraw();
                 isDrawing = false;
+                currentGuide = null;
             } else {
                 startX = e.offsetX;
                 startY = e.offsetY;
                 isDrawing = true;
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDrawing) {
+                const guideEndX = isVerticalMode ? startX : e.offsetX;
+                const guideEndY = isHorizontalMode ? startY : e.offsetY;
+                currentGuide = { x1: startX, y1: startY, x2: guideEndX, y2: guideEndY };
+                redraw();
             }
         });
 
@@ -197,7 +208,6 @@
         function drawMarkers(x1, y1, x2, y2) {
             const angle = Math.atan2(y2 - y1, x2 - x1);
             const markerLength = 10; // 印の長さ
-
             const drawMarker = (x, y) => {
                 const offsetX = Math.cos(angle + Math.PI / 2) * markerLength;
                 const offsetY = Math.sin(angle + Math.PI / 2) * markerLength;
@@ -225,20 +235,17 @@
                     drawMarkers(line.x1, line.y1, line.x2, line.y2);
                 }
             });
-        }
 
-        undoButton.addEventListener('click', () => {
-            if (lines.length > 0) {
-                lines.pop();
-                const lastLabel = labels.pop();
-                if (lastLabel) lastLabel.remove();
-                redraw();
-
-                if (isContinuousMode && basePixelsPerMM) {
-                    totalLength = lines.reduce((sum, line) => sum + (line.length / basePixelsPerMM), 0);
-                }
+            if (currentGuide) {
+                ctx.setLineDash([5, 5]); // 点線
+                ctx.strokeStyle = "red";
+                ctx.beginPath();
+                ctx.moveTo(currentGuide.x1, currentGuide.y1);
+                ctx.lineTo(currentGuide.x2, currentGuide.y2);
+                ctx.stroke();
+                ctx.setLineDash([]); // 点線解除
             }
-        });
+        }
 
         toggleModeButton.addEventListener('click', () => {
             isContinuousMode = !isContinuousMode;
@@ -267,6 +274,19 @@
 
         colorPicker.addEventListener('input', () => {
             currentColor = colorPicker.value;
+        });
+
+        undoButton.addEventListener('click', () => {
+            if (lines.length > 0) {
+                lines.pop();
+                const lastLabel = labels.pop();
+                if (lastLabel) lastLabel.remove();
+                redraw();
+
+                if (isContinuousMode && basePixelsPerMM) {
+                    totalLength = lines.reduce((sum, line) => sum + (line.length / basePixelsPerMM), 0);
+                }
+            }
         });
     </script>
 </body>
