@@ -160,11 +160,8 @@
                 const x = rect.left - canvas.offsetLeft;
                 const y = rect.top - canvas.offsetTop;
                 tempCtx.font = '12px Arial';
-                tempCtx.fillStyle = 'white';
-                tempCtx.strokeStyle = 'black';
-                tempCtx.lineWidth = 2;
+                tempCtx.fillStyle = 'black';
                 tempCtx.fillText(label.textContent, x, y);
-                tempCtx.strokeText(label.textContent, x, y);
             });
 
             // 保存
@@ -186,13 +183,13 @@
             label.style.top = `${canvas.offsetTop + midY}px`;
 
             label.addEventListener('mousedown', (e) => {
-                e.stopPropagation();
-                const offsetX = e.clientX - label.getBoundingClientRect().left;
-                const offsetY = e.clientY - label.getBoundingClientRect().top;
+                e.preventDefault();
+                const offsetX = e.clientX - label.offsetLeft;
+                const offsetY = e.clientY - label.offsetTop;
 
-                const onMouseMove = (moveEvent) => {
-                    label.style.left = `${moveEvent.clientX - offsetX}px`;
-                    label.style.top = `${moveEvent.clientY - offsetY}px`;
+                const onMouseMove = (e) => {
+                    label.style.left = `${e.clientX - offsetX}px`;
+                    label.style.top = `${e.clientY - offsetY}px`;
                 };
 
                 const onMouseUp = () => {
