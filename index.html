@@ -180,52 +180,109 @@
             drawMarker(x2, y2);
         }
 
-        // ラベル追加
+        // ラベルを追加
         function addLabel(x, y, text) {
             const label = document.createElement('div');
-            label.classList.add('length-label');
+            label.className = 'length-label';
+            label.textContent = text;
             label.style.left = `${x}px`;
             label.style.top = `${y}px`;
-            label.textContent = text;
-            document.body.appendChild(label);
-            labels.push(label);
+
+            // ドラッグ機能
+            let isDragging = false;
+            let offsetX, offsetY;
 
             label.addEventListener('mousedown', (e) => {
-                let offsetX = e.offsetX;
-                let offsetY = e.offsetY;
-
-                const mouseMove = (moveEvent) => {
-                    label.style.left = `${moveEvent.clientX - offsetX}px`;
-                    label.style.top = `${moveEvent.clientY - offsetY}px`;
-                };
-
-                const mouseUp = () => {
-                    document.removeEventListener('mousemove', mouseMove);
-                    document.removeEventListener('mouseup', mouseUp);
-                };
-
-                document.addEventListener('mousemove', mouseMove);
-                document.addEventListener('mouseup', mouseUp);
+                isDragging = true;
+                offsetX = e.offsetX;
+                offsetY = e.offsetY;
             });
+
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    label.style.left = `${e.pageX - offsetX}px`;
+                    label.style.top = `${e.pageY - offsetY}px`;
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            document.body.appendChild(label);
+            labels.push(label);
         }
 
-        // 長さ計算
+        // 長さを計算
         function calculateLength(x1, y1, x2, y2) {
-            return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+            return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
         }
 
-        // 保存ボタン
+        // ボタンの機能
+        undoButton.addEventListener('click', () => {
+            if (lines.length > 0) {
+                lines.pop();
+                labels.pop()?.remove();
+                redrawCanvas();
+            }
+        });
+
+        toggleModeButton.addEventListener('click', () => {
+            isContinuousMode = !isContinuousMode;
+            toggleModeButton.textContent = `連続測定モード: ${isContinuousMode ? 'オン' : 'オフ'}`;
+        });
+
+        horizontalModeButton.addEventListener('click', () => {
+            isHorizontalMode = !isHorizontalMode;
+            horizontalModeButton.textContent = `水平モード: ${isHorizontalMode ? 'オン' : 'オフ'}`;
+        });
+
+        verticalModeButton.addEventListener('click', () => {
+            isVerticalMode = !isVerticalMode;
+            verticalModeButton.textContent = `垂直モード: ${isVerticalMode ? 'オン' : 'オフ'}`;
+        });
+
+        toggleMarkersButton.addEventListener('click', () => {
+            showMarkers = !showMarkers;
+            toggleMarkersButton.textContent = `印表示: ${showMarkers ? 'オン' : 'オフ'}`;
+            redrawCanvas();
+        });
+
+        updateBaseLengthButton.addEventListener('click', () => {
+            const baseLength = parseFloat(baseLengthInput.value);
+            if (baseLength > 0) {
+                const referenceLine = lines[lines.length - 1];
+                if (referenceLine) {
+                    const refLength = calculateLength(
+                        referenceLine.x1,
+                        referenceLine.y1,
+                        referenceLine.x2,
+                        referenceLine.y2
+                    );
+                    basePixelsPerMM = refLength / baseLength;
+                    alert('基準を更新しました。');
+                } else {
+                    alert('基準となる線を描画してください。');
+                }
+            } else {
+                alert('正しい基準値を入力してください。');
+            }
+        });
+
+        colorPicker.addEventListener('change', (e) => {
+            currentColor = e.target.value;
+        });
+
         saveImageButton.addEventListener('click', () => {
             const exportCanvas = document.createElement('canvas');
             const exportCtx = exportCanvas.getContext('2d');
-
             exportCanvas.width = canvas.width;
             exportCanvas.height = canvas.height;
 
             // 背景画像描画
             exportCtx.drawImage(image, 0, 0);
 
-            // 線とラベルを描画
+            // 線描画
             lines.forEach(line => {
                 exportCtx.strokeStyle = line.color;
                 exportCtx.beginPath();
@@ -236,13 +293,13 @@
                 if (showMarkers) drawMarkers(line.x1, line.y1, line.x2, line.y2, exportCtx);
             });
 
+            // ラベル描画
             labels.forEach(label => {
                 exportCtx.fillStyle = "black";
                 exportCtx.fillRect(parseInt(label.style.left), parseInt(label.style.top), 50, 20);
-
                 exportCtx.fillStyle = "white";
                 exportCtx.textAlign = "center";
-                exportCtx.fillText(label.textContent, parseInt(label.style.left) + 25, parseInt(label.style.top) + 10);
+                exportCtx.fillText(label.textContent, parseInt(label.style.left) + 25, parseInt(label.style.top) + 12);
             });
 
             // 保存
@@ -252,6 +309,13 @@
             link.download = 'measured_image.png';
             link.click();
         });
+
+        // キャンバス再描画
+        function redrawCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(image, 0, 0);
+            lines.forEach(line => drawLine(line.x1, line.y1, line.x2, line.y2, line.color));
+        }
     </script>
 </body>
 </html>
