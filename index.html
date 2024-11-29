@@ -207,17 +207,31 @@
             return label;
         }
 
-        function drawMarkers(x1, y1, x2, y2) {
-        const markerHeight = 10; // 縦線の高さ
-        const markerWidth = 2; // 縦線の幅
+    function drawMarkers(x1, y1, x2, y2) {
+    const markerLength = 10; // 縦線（印）の長さ
+    const angle = Math.atan2(y2 - y1, x2 - x1); // 線の傾き
+    const perpendicularAngle = angle + Math.PI / 2; // 線に対する90°の角度
 
-        // 始点の縦線を描画
-        ctx.fillStyle = currentColor;
-        ctx.fillRect(x1 - markerWidth / 2, y1 - markerHeight / 2, markerWidth, markerHeight);
+    const drawMarker = (x, y) => {
+    const offsetX = Math.cos(perpendicularAngle) * markerLength / 2;
+    const offsetY = Math.sin(perpendicularAngle) * markerLength / 2;
 
-        // 終点の縦線を描画
-        ctx.fillRect(x2 - markerWidth / 2, y2 - markerHeight / 2, markerWidth, markerHeight);
-    }
+        // マーカーを描画（90°の角度）
+        ctx.beginPath();
+        ctx.moveTo(x - offsetX, y - offsetY);
+        ctx.lineTo(x + offsetX, y + offsetY);
+        ctx.strokeStyle = currentColor;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    };
+
+    // 始点の印を描画
+    drawMarker(x1, y1);
+
+    // 終点の印を描画
+    drawMarker(x2, y2);
+}
+
 
        function redraw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
